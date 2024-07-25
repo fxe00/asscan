@@ -14,8 +14,8 @@ var (
 	Ports      string
 	HostFile   string
 	HostPort   []string
-	WebTimeout int64 = 5
-	Timeout    int64 = 3
+	WebTimeout int64 = 3
+	Timeout    int64 = 2
 	Threads    int
 )
 

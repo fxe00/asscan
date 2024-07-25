@@ -1,12 +1,15 @@
 package plugins
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strconv"
 	"sync"
 	"time"
 
 	"github.com/Fxe-h/asscan/common"
+	"github.com/cheggaaa/pb"
 )
 
 type Addr struct {
@@ -21,31 +24,47 @@ func PortScan(hostslist []string, ports string, timeout int64) []string {
 		fmt.Printf("[-] parse port %s error, please check your port format\n", ports)
 		return AliveAddress
 	}
+
 	workers := common.Threads
-	// fmt.Printf("workers: %v\n", workers)
-	Addrs := make(chan Addr, len(hostslist)*len(probePorts))
-	results := make(chan string, len(hostslist)*len(probePorts))
+	totalTasks := len(hostslist) * len(probePorts)
+	bar := pb.StartNew(totalTasks).Prefix("Scanning")
+
+	Addrs := make(chan Addr, totalTasks)
+	results := make(chan string, totalTasks)
 	var wg sync.WaitGroup
 
-	//接收结果
+	// 创建文件以存储结果
+	file, err := os.Create("result.txt")
+	if err != nil {
+		fmt.Println("Failed to create result file:", err)
+		return AliveAddress
+	}
+	defer file.Close()
+
+	writer := bufio.NewWriter(file)
+
+	// 接收结果
 	go func() {
 		for found := range results {
 			AliveAddress = append(AliveAddress, found)
+			_, _ = writer.WriteString(found + "\n") // 写入文件
+			_ = writer.Flush()                       // 刷新缓冲区
 			wg.Done()
 		}
 	}()
 
-	//多线程扫描
+	// 多线程扫描
 	for i := 0; i < workers; i++ {
 		go func() {
 			for addr := range Addrs {
 				PortConnect(addr, results, timeout, &wg)
 				wg.Done()
+				bar.Increment() // 更新进度条
 			}
 		}()
 	}
 
-	//添加扫描目标
+	// 添加扫描目标
 	for _, port := range probePorts {
 		for _, host := range hostslist {
 			wg.Add(1)
@@ -55,6 +74,8 @@ func PortScan(hostslist []string, ports string, timeout int64) []string {
 	wg.Wait()
 	close(Addrs)
 	close(results)
+	bar.FinishPrint("Done!") // 完成进度条
+
 	return AliveAddress
 }
 
