@@ -1,11 +1,13 @@
 package common
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
 
 func ParsePort(ports string) (scanPorts []int) {
+	fmt.Printf("scan ports: %v\n", ports)
 	if ports == "" {
 		return
 	}

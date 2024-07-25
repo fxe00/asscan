@@ -22,6 +22,7 @@ func PortScan(hostslist []string, ports string, timeout int64) []string {
 		return AliveAddress
 	}
 	workers := common.Threads
+	// fmt.Printf("workers: %v\n", workers)
 	Addrs := make(chan Addr, len(hostslist)*len(probePorts))
 	results := make(chan string, len(hostslist)*len(probePorts))
 	var wg sync.WaitGroup
@@ -63,7 +64,7 @@ func PortConnect(addr Addr, respondingHosts chan<- string, adjustedTimeout int64
 	if err == nil {
 		defer conn.Close()
 		address := host + ":" + strconv.Itoa(port)
-		fmt.Printf("%s open", address)
+		fmt.Printf("[*] %s open\n", address)
 		wg.Add(1)
 		respondingHosts <- address
 	}

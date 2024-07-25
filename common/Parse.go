@@ -18,6 +18,13 @@ func ParseInput(Info *HostInfo) {
 	}
 
 	if Ports == DefaultPorts {
-		Ports += "," + Webport
+		ports := ""
+		for i := 1; i <= 65535; i++ {
+			if i > 1 {
+				ports += ","
+			}
+			ports += fmt.Sprintf("%d", i)
+		}
+		Ports = ports
 	}
 }
