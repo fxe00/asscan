@@ -1,5 +1,6 @@
 从fscan中提取出的端口扫描, 以进度条展示扫描过程
 
+```
    __    ___  ___   ___    __    _  _
   /__\  / __)/ __) / __)  /__\  ( \( )
  /(__)\ \__ \\__ \( (__  /(__)\  )  (
@@ -14,3 +15,4 @@ Usage of /tmp/go-build854421412/b001/exe/main:
         Select a port,for example: 22 | 1-65535 | 22,80,3306 (default "1-65535")
   -t int
         Thread nums (default 600)
+```
