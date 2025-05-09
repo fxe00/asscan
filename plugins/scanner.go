@@ -8,7 +8,7 @@ import (
 )
 
 func Scan(info common.HostInfo) {
-	fmt.Println("start infoscan")
+	fmt.Println("start port scan")
 	Hosts, err := common.ParseIP(info.Host, common.HostFile)
 	if err != nil {
 		fmt.Println("len(hosts)==0", err)

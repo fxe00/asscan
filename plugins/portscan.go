@@ -10,6 +10,7 @@ import (
 
 	"github.com/Fxe-h/asscan/common"
 	"github.com/cheggaaa/pb"
+	au "github.com/logrusorgru/aurora/v4"
 )
 
 type Addr struct {
@@ -48,7 +49,7 @@ func PortScan(hostslist []string, ports string, timeout int64) []string {
 		for found := range results {
 			AliveAddress = append(AliveAddress, found)
 			_, _ = writer.WriteString(found + "\n") // 写入文件
-			_ = writer.Flush()                       // 刷新缓冲区
+			_ = writer.Flush()                      // 刷新缓冲区
 			wg.Done()
 		}
 	}()
@@ -85,7 +86,12 @@ func PortConnect(addr Addr, respondingHosts chan<- string, adjustedTimeout int64
 	if err == nil {
 		defer conn.Close()
 		address := host + ":" + strconv.Itoa(port)
-		fmt.Printf("[*] %s open\n", address)
+		fmt.Printf("%s %s:%s %s\n",
+			au.Green("[*]").Bold(),
+			au.Blue(host).Bold(),
+			au.Blue(strconv.Itoa(port)).Bold(),
+			au.Green("open").Bold(),
+		)
 		wg.Add(1)
 		respondingHosts <- address
 	}
