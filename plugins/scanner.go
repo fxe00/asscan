@@ -17,7 +17,6 @@ func Scan(info common.HostInfo) {
 	var wg = sync.WaitGroup{}
 	if len(Hosts) > 0 || len(common.HostPort) > 0 {
 		var AlivePorts []string = []string{}
-		// fmt.Printf("common.Ports: %v\n", common.Ports)
 		AlivePorts = PortScan(Hosts, common.Ports, common.Timeout)
 		fmt.Println("[*] alive ports len is:", len(AlivePorts))
 		wg.Wait()

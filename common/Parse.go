@@ -7,7 +7,7 @@ import (
 )
 
 func Parse(Info *HostInfo) {
-
+	ParseInput(Info)
 }
 
 func ParseInput(Info *HostInfo) {
@@ -15,16 +15,5 @@ func ParseInput(Info *HostInfo) {
 		fmt.Println("Host is none")
 		flag.Usage()
 		os.Exit(0)
-	}
-
-	if Ports == DefaultPorts {
-		ports := ""
-		for i := 1; i <= 65535; i++ {
-			if i > 1 {
-				ports += ","
-			}
-			ports += fmt.Sprintf("%d", i)
-		}
-		Ports = ports
 	}
 }

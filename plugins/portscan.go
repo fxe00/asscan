@@ -64,7 +64,7 @@ func PortScan(hostslist []string, ports string, timeout int64) []string {
 			}
 		}()
 	}
-
+	
 	// 添加扫描目标
 	for _, port := range probePorts {
 		for _, host := range hostslist {
@@ -76,7 +76,6 @@ func PortScan(hostslist []string, ports string, timeout int64) []string {
 	close(Addrs)
 	close(results)
 	bar.FinishPrint("Done!") // 完成进度条
-
 	return AliveAddress
 }
 
