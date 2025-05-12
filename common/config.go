@@ -17,12 +17,11 @@ type HostInfo struct {
 }
 
 var (
-	Ports      string
-	HostFile   string
-	HostPort   []string
-	WebTimeout int64 = 3
-	Timeout    int64 = 2
-	Threads    int
+	Ports    string
+	HostFile string
+	HostPort []string
+	Timeout  int64
+	Threads  int
 )
 
 var PORTList = map[string]int{

@@ -1,0 +1,109 @@
+name: Build and Release asscan
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on tags like v1.0, v0.1.0, etc.
+
+jobs:
+  build-linux:
+    name: Build Linux (amd64) binary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.1'
+
+      - name: Build Linux static binary (amd64)
+        run: |
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o asscan -ldflags="-s -w" ./...
+
+      - name: Upload Linux build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: asscan-linux-amd64
+          path: asscan
+
+  build-windows:
+    name: Build Windows (amd64) binary
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.1'
+
+      - name: Build Windows binary (amd64)
+        shell: pwsh
+        run: |
+          $env:GOOS = "windows"
+          $env:GOARCH = "amd64"
+          go build -v -o asscan.exe -ldflags="-s -w" ./...
+
+      - name: Upload Windows build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: asscan-windows-amd64
+          path: asscan.exe
+
+  build-macos:
+    name: Build macOS binary
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        goarch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.1'
+
+      - name: Build macOS binary (${{ matrix.goarch }})
+        run: |
+          GOOS=darwin GOARCH=${{ matrix.goarch }} go build -v -o asscan -ldflags="-s -w" ./...
+
+      - name: Upload macOS build artifact (${{ matrix.goarch }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: asscan-macos-${{ matrix.goarch }}
+          path: asscan
+
+  create-release:
+    name: Create GitHub Release
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release-artifacts
+          mv asscan-linux-amd64/asscan release-artifacts/asscan-linux-amd64
+          mv asscan-windows-amd64/asscan.exe release-artifacts/asscan-windows-amd64.exe
+          mv asscan-macos-amd64/asscan release-artifacts/asscan-macos-amd64
+          mv asscan-macos-arm64/asscan release-artifacts/asscan-macos-arm64
+          
+          # Make Linux and macOS binaries executable (Windows doesn't need this)
+          chmod +x release-artifacts/asscan-linux-amd64
+          chmod +x release-artifacts/asscan-macos-amd64
+          chmod +x release-artifacts/asscan-macos-arm64
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-artifacts/asscan-linux-amd64
+            release-artifacts/asscan-windows-amd64.exe
+            release-artifacts/asscan-macos-amd64
+            release-artifacts/asscan-macos-arm64
